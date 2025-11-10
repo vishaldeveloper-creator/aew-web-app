@@ -21,7 +21,7 @@ export default function Leave() {
             setAdmin(username);
 
             const token = localStorage.getItem("U_Token");
-            const response = await fetch(`${url}assigned-leaves`, {
+            const response = await fetch(`${url}/assigned-leaves`, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }

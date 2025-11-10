@@ -30,7 +30,7 @@ export default function AssignAsset() {
     const username = localStorage.getItem("role");
     const managerId = localStorage.getItem("managerId");
     // const token = localStorage.getItem("U_Token");
-    const res = await fetch(`http://192.168.12.181:8000/employee?role=${username}&managerId=${managerId}`);
+    const res = await fetch(`${url}/employee?role=${username}&managerId=${managerId}`);
     const result = await res.json()
     console.log(result)
     setUsers(result)
@@ -92,7 +92,7 @@ export default function AssignAsset() {
 
     try {
       setLoading(true);
-      const res = await fetch(`${url}assign-assets`, {
+      const res = await fetch(`${url}/assign-assets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem("U_Token")}` },
         body: JSON.stringify(payload)

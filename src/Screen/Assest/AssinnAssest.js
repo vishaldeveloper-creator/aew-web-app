@@ -16,7 +16,7 @@ const AssetAcknowledgment = () => {
     const fetchAssets = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${url}show-assign-assets`, {
+        const res = await fetch(`${url}/show-assign-assets`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const result = await res.json();
@@ -77,7 +77,7 @@ const AssetAcknowledgment = () => {
         };
       });
 
-      const res = await fetch(`${url}acknowledge-assets`, {
+      const res = await fetch(`${url}/acknowledge-assets`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

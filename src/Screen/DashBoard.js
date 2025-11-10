@@ -20,7 +20,7 @@ export default function DashboardScreen() {
             setAdmin(username);
 
             const token = localStorage.getItem("U_Token");
-            const response = await fetch(`${url}assigned-leaves`, {
+            const response = await fetch(`${url}/assigned-leaves`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -44,7 +44,7 @@ export default function DashboardScreen() {
             const managerId = localStorage.getItem("managerId");
 
             const res = await fetch(
-                `http://192.168.12.181:8000/employee?role=${username}&managerId=${managerId}`
+                `${url}/employee?role=${username}&managerId=${managerId}`
             );
             const result = await res.json();
             console.log("Department users:", result);

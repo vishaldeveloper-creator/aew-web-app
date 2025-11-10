@@ -82,7 +82,7 @@ function SignUp() {
                     ...(form.role === 'employee' && { managerId })
                 };
 
-                const res = await fetch(`${url}register`, {
+                const res = await fetch(`${url}/register`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)

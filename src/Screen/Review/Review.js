@@ -23,7 +23,7 @@ const ReviewTable = () => {
         const fetchRatings = async () => {
             try {
                 const token = localStorage.getItem("U_Token");
-                const res = await axios.get(`${url}show-ratings`, {
+                const res = await axios.get(`${url}/show-ratings`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setRatings(res.data);

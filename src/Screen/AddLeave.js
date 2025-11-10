@@ -132,7 +132,7 @@ const AddLeave = () => {
 
         try {
             const token = localStorage.getItem("U_Token");
-            const response = await fetch(`${url}submit`, {
+            const response = await fetch(`${url}/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

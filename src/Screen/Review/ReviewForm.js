@@ -52,7 +52,7 @@ const ReviewForm = () => {
     const fetchEmployees = async () => {
         try {
             const token = localStorage.getItem("U_Token");
-            const res = await axios.get(`${url}api/manager-employees`, {
+            const res = await axios.get(`${url}/api/manager-employees`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setEmployees(res.data);
@@ -110,7 +110,7 @@ const ReviewForm = () => {
         try {
             const token = localStorage.getItem("U_Token");
             console.log("Submitting:", formData);
-            await axios.post(`${url}assign-ratings`, formData, {
+            await axios.post(`${url}/assign-ratings`, formData, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             alert("Review submitted successfully!");
