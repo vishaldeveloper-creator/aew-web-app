@@ -1,4 +1,7 @@
 import React from 'react'
+
+import "./App.css";
+
 import Nav from './Nav'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import DashBoard from './Screen/DashBoard'
@@ -19,9 +22,21 @@ import Leave from './Screen/Leave'
 function App() {
   return (
     <div className="App">
+
       <div className="app-layout">
         <BrowserRouter>
           <Nav />
+          <header className="App-header">
+            <div className="header-content">
+              {/* <img
+                src="/Applogo.jpeg"
+                alt="AEW Smart Logo"
+                className="app-logo"
+              /> */}
+              <h1 className="app-title">Welcome to AEW Smart Service</h1>
+            </div>
+          </header>
+
           <div className="main-content">
             <Routes>
               <Route path="/" element={<PrivateComponent />} >

@@ -26,7 +26,8 @@ body {
 
 /* === Header === */
 .nav_Header {
-  background-color: #23023f;
+  background: linear-gradient(90deg,   #ffffff, #dddae0,#2600e7, #a9006e, #1e0471, #3c0052);
+  /* background gradient */
   padding: 10px 20px;
   display: flex;
   align-items: center;
@@ -151,7 +152,8 @@ body {
   }
 
   .App-logo {
-    margin: 0 auto 10px;
+    margin: 50px auto 10px;
+    border-radius: 100px;
 
   }
 }
@@ -603,4 +605,72 @@ label {
 
 .assignmentLog li {
   margin-bottom: 8px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.App-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(90deg, #622ad2, #05485e, #2c5364);
+  /* background gradient */
+  padding: 0px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  /* space between logo and text */
+}
+
+/* .app-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 10px;
+} */
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, #f1f1f1, #fcfcfc);
+  /* text gradient */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }

@@ -15,7 +15,7 @@ function Nav() {
     return (
         <div className="nav_Header">
             <img
-                src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
+                src="/Applogcurcle.jpg"
                 alt="React Logo"
                 className="App-logo"
             />
