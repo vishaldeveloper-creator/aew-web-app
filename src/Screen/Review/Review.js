@@ -125,8 +125,8 @@ const ReviewTable = () => {
                             <tbody>
                                 {entry.ratings.map((r, i) => (
                                     <tr key={i} style={{ borderBottom: "1px solid #edf2f7" }}>
-                                        <td style={td}>{r.kpa}</td>
-                                        <td style={{ ...td, color: "#374151" }}>{r.responsibility}</td>
+                                        <td style={td}>{r.kpaTitle}</td>
+                                        <td style={{ ...td, color: "#374151" }}>{r.kpaResponsibility}</td>
                                         <td style={td}>
                                             <Stars rating={r.employeeRating} />
                                         </td>

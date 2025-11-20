@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { url } from '../Baseurl'; // Adjust if needed
-import '../Css/Login.css'; // Your existing CSS
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { url } from "../Baseurl";
+import "../Css/Login.css";
 
 function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false); // 👈 loading state
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -20,6 +21,9 @@ function Login() {
             return;
         }
 
+        setLoading(true); // start loader
+        setError("");
+
         try {
             const res = await fetch(`${url}/login`, {
                 method: "POST",
@@ -30,22 +34,16 @@ function Login() {
             const result = await res.json();
             if (res.ok) {
                 const { user, token } = result;
-                console.log(user)
 
-                // ✅ Store securely
                 localStorage.setItem("U_Token", token);
                 localStorage.setItem("userId", user.id);
                 localStorage.setItem("username", user.name);
                 localStorage.setItem("email", user.email);
                 localStorage.setItem("role", user.role);
                 localStorage.setItem("userCode", user.employeescode);
-                localStorage.setItem("managerId", user.managerId || "");
                 localStorage.setItem("department", user.department);
-                if (user.role === "manager") {
-                    localStorage.setItem("managerId", user.id); // manager's own ID
-                } else if (user.role === "employee") {
-                    localStorage.setItem("managerId", user.managerId); // employee's manager ID
-                }
+                localStorage.setItem("managerId", user.role === "manager" ? user.id : user.managerId || "");
+
                 navigate("/");
             } else {
                 setError(result.message || "Invalid login credentials.");
@@ -53,34 +51,49 @@ function Login() {
         } catch (err) {
             console.error("Login error:", err);
             setError("Server error. Please try again.");
+        } finally {
+            setLoading(false); // stop loader
         }
     };
 
     return (
-        <div className='form-container'>
-            <h1>Login</h1>
+        <div className="login-page">
+            {/* Modal Loader */}
+            {loading && (
+                <div className="modal-overlay">
+                    <div className="loader"></div>
+                </div>
+            )}
 
-            <input
-                type='email'
-                className='inputBox'
-                placeholder='Enter Your Email'
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
+            <div className="form-container">
+                <h1 className="login-title">Login</h1>
 
-            <input
-                type='password'
-                className='inputBox'
-                placeholder='Enter Your Password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
+                <input
+                    type="email"
+                    className="inputBox"
+                    placeholder="Enter Your Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
 
-            {error && <div className='error-msg'>{error}</div>}
+                <input
+                    type="password"
+                    className="inputBox"
+                    placeholder="Enter Your Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
 
-            <button onClick={handleLogin} className='AppButton'>
-                Login
-            </button>
+                {error && <div className="error-msg">{error}</div>}
+
+                <button
+                    onClick={handleLogin}
+                    className="AppButton"
+                    disabled={loading}
+                >
+                    {loading ? "Logging in..." : "Login"}
+                </button>
+            </div>
         </div>
     );
 }

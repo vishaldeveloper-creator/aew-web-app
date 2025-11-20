@@ -22,10 +22,11 @@ export default function Leave() {
             });
 
             if (!response.ok) throw new Error('Failed to fetch leaves');
+
             const data = await response.json();
             setLeaves(Array.isArray(data) ? data : []);
         } catch (err) {
-            console.error('Failed to fetch leaves:', err);
+            console.error("Error fetching leaves:", err);
             setLeaves([]);
         } finally {
             setLoading(false);
@@ -37,22 +38,27 @@ export default function Leave() {
     }, [fetchLeaves]);
 
     return (
-        <div style={styles.container}>
+        <div style={styles.pageWrapper}>
+            {/* Heading */}
+            <h1 style={styles.title}>Leave Dashboard</h1>
+
+            {/* Add Button */}
             {admin !== 'manager' && (
-                <div style={styles.buttonRow}>
-                    <button
-                        style={{ ...styles.updateBtn, backgroundColor: 'green' }}
-                        onClick={() => navigate('/Add')}
-                    >
-                        Add Leave
+                <div style={styles.addBtnRow}>
+                    <button style={styles.addBtn} onClick={() => navigate('/Add')}>
+                        ➕ Add New Leave
                     </button>
                 </div>
             )}
 
+            {/* Main Content */}
             {loading ? (
-                <p>Loading...</p>
+                <div style={styles.loadingWrapper}>
+                    <div className="spinner"></div>
+                    <p>Loading leaves...</p>
+                </div>
             ) : (
-                <div style={{ marginTop: '20px' }}>
+                <div style={styles.gridWrapper}>
                     {leaves.length > 0 ? (
                         leaves.map((item) => (
                             <LeaveCard
@@ -63,7 +69,7 @@ export default function Leave() {
                             />
                         ))
                     ) : (
-                        <p>No leave records found.</p>
+                        <p style={styles.noData}>No leave records found.</p>
                     )}
                 </div>
             )}
@@ -71,19 +77,62 @@ export default function Leave() {
     );
 }
 
+/* ------------------------------------- */
+/*              PROFESSIONAL STYLE       */
+/* ------------------------------------- */
+
 const styles = {
-    container: { padding: '20px', fontFamily: 'Arial' },
-    buttonRow: {
-        display: 'flex',
-        justifyContent: 'flex-start',
-        marginTop: '12px',
+    pageWrapper: {
+        padding: '20px',
+        fontFamily: "Inter, Arial, sans-serif",
+        maxWidth: '1200px',
+        margin: '0 auto',
     },
-    updateBtn: {
-        padding: '10px 15px',
+
+    title: {
+        fontSize: '28px',
+        fontWeight: '700',
+        marginBottom: '20px',
+        color: '#222',
+        textAlign: 'left',
+    },
+
+    addBtnRow: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginBottom: '20px',
+    },
+
+    addBtn: {
+        padding: '12px 22px',
+        background: '#0078FF',
         color: 'white',
-        borderRadius: '5px',
+        fontSize: '16px',
+        borderRadius: '8px',
         border: 'none',
         cursor: 'pointer',
-        marginRight: '10px',
+        transition: '0.2s',
+        fontWeight: '600',
+    },
+
+    gridWrapper: {
+        display: 'grid',
+        gap: '18px',
+
+        /* Fully Responsive Grid */
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    },
+
+    loadingWrapper: {
+        textAlign: 'center',
+        marginTop: '30px',
+    },
+
+    noData: {
+        textAlign: 'center',
+        color: '#777',
+        fontSize: '16px',
+        marginTop: '25px',
     },
 };
+

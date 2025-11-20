@@ -1,0 +1,102 @@
+.assign-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* USER CARD */
+.user-info-card {
+  background: #e9f5ff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+/* FORM GRID */
+.form-grid {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 260px;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* ASSETS GRID */
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.asset-card {
+  border: 1px solid #ddd;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fafafa;
+  transition: 0.3s ease;
+}
+
+.asset-card.active {
+  background: #e7ffe8;
+  border-color: #4caf50;
+}
+
+/* HEADER */
+.asset-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qty-btns button {
+  width: 32px;
+  height: 32px;
+  background: #4caf50;
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.qty-btns span {
+  margin: 0 8px;
+}
+
+.preview-img {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+/* BUTTON */
+.assign-btn {
+  width: 100%;
+  padding: 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  font-size: 18px;
+  border-radius: 8px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}

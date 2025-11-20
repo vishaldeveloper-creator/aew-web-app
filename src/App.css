@@ -26,7 +26,7 @@ body {
 
 /* === Header === */
 .nav_Header {
-  background: linear-gradient(90deg, #ffffff, #ffffff, #1e0471, #1e0471, #1e0471, #1e0471, #3c0052);
+  background: linear-gradient(90deg, #fdfdfd, #dfdfdf, #1e0471, #1e0471, #1e0471, #1e0471, #3c0052);
   /* background gradient */
   padding: 10px 20px;
   display: flex;

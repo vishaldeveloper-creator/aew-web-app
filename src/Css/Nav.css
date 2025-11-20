@@ -1,0 +1,132 @@
+/* NAV MAIN WRAPPER */
+.nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0b1a36;
+    padding: 12px 20px;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 99;
+}
+
+/* LEFT SIDE (LOGO + NAME) */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.brand {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* MENU */
+.nav-menu {
+    display: flex;
+    align-items: center;
+}
+
+.nav-menu ul {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+}
+
+.nav-link {
+    color: #d7e2ff;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.active {
+    background: #1a73e8;
+    color: white;
+}
+
+.logout-btn {
+    background: #d9534f;
+    border: none;
+    padding: 7px 15px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #c64542;
+}
+
+/* HAMBURGER FOR MOBILE */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.hamburger span {
+    width: 26px;
+    height: 3px;
+    background: white;
+    transition: 0.3s;
+}
+
+.hamburger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* MOBILE RESPONSIVE MENU */
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+
+    .nav-menu {
+        position: absolute;
+        top: 65px;
+        left: 0;
+        width: 100%;
+        background: #0b1a36;
+        padding: 20px 0;
+        display: none;
+        flex-direction: column;
+    }
+
+    .nav-menu.show {
+        display: block;
+    }
+
+    .nav-menu ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+}

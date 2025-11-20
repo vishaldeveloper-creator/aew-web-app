@@ -1,162 +1,278 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { url } from '../Baseurl'; // example: http://localhost:5000/api/
+import React, { useEffect, useState, useCallback } from "react";
+import { url } from "../Baseurl";
 
-function ProfileForm() {
-    const [form, setForm] = useState({
-        name: '',
-        username: '',
-        email: '',
-        profileimage: '',
-        address: {
-            street: '',
-            suite: '',
-            city: '',
-            zipcode: '',
-            geo: { lat: '', lng: '' },
-        },
-        phone: '',
-        website: '',
-        company: { name: '', catchPhrase: '', bs: '' },
+/* ------------------- FIX: MOVE EMPTY PROFILE OUTSIDE COMPONENT ------------------- */
+const EMPTY_PROFILE = {
+    phone: "",
+    website: "",
+    profileimage: "",
+    address: {
+        street: "",
+        suite: "",
+        city: "",
+        zipcode: "",
+        geo: { lat: "", lng: "" }
+    },
+    company: {
+        name: "",
+        catchPhrase: "",
+        bs: ""
+    }
+};
+
+export default function Profile() {
+    const token = localStorage.getItem("U_Token");
+
+    const [form, setForm] = useState(EMPTY_PROFILE);
+    const [exists, setExists] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
+    const [previewImg, setPreviewImg] = useState(null);
+
+    const [userInfo, setUserInfo] = useState({
+        name: "",
+        email: "",
+        employeescode: "",
+        department: ""
     });
 
-    const [isExistingProfile, setIsExistingProfile] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    /* ------------------- FETCH PROFILE ------------------- */
+    const loadProfile = useCallback(() => {
+        fetch(`${url}/api/profile`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (!data.success) return;
+
+                setUserInfo({
+                    name: data.user.name,
+                    email: data.user.email,
+                    employeescode: data.user.employeescode,
+                    department: data.user.department
+                });
+
+                if (!data.profile) {
+                    setExists(false);
+                    return;
+                }
+
+                setExists(true);
+                setForm({ ...EMPTY_PROFILE, ...data.profile });
+                setPreviewImg(`${url}${data.profile.profileimage}`);
+            })
+            .catch((err) => console.log("Fetch error:", err));
+    }, [token]);
 
     useEffect(() => {
-        const token = localStorage.getItem('U_Token');
-        if (!token) {
-            setLoading(false);
-            return;
-        }
+        loadProfile();
+    }, [loadProfile]);
 
-        axios
-            .get(`${url}api/profile`, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            .then(res => {
-                setForm(res.data);
-                setIsExistingProfile(true);
-            })
-            .catch(err => {
-                if (err.response?.status === 404) {
-                    setIsExistingProfile(false); // no profile found, create new
-                    setForm({
-                        name: '',
-                        username: '',
-                        email: '',
-                        profileimage: '',
-                        address: {
-                            street: '',
-                            suite: '',
-                            city: '',
-                            zipcode: '',
-                            geo: { lat: '', lng: '' },
-                        },
-                        phone: '',
-                        website: '',
-                        company: { name: '', catchPhrase: '', bs: '' },
-                    });
-                } else {
-                    setError('Failed to load profile');
-                    console.error(err);
-                }
-            })
-            .finally(() => setLoading(false));
-    }, []);
-
+    /* ------------------- INPUT CHANGE ------------------- */
     const handleChange = (e) => {
         const { name, value } = e.target;
-        const keys = name.split('.');
-        setForm(prev => {
-            const updated = { ...prev };
-            let obj = updated;
-            keys.forEach((key, i) => {
-                if (i === keys.length - 1) obj[key] = value;
-                else obj = obj[key];
-            });
-            return updated;
-        });
-    };
 
-    const handleImage = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const maxWidth = 300;
-                const scaleSize = maxWidth / img.width;
-                canvas.width = maxWidth;
-                canvas.height = img.height * scaleSize;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                let quality = 0.9;
-                let base64 = '';
-                do {
-                    base64 = canvas.toDataURL('image/jpeg', quality);
-                    quality -= 0.05;
-                } while (base64.length > 40 * 1024 && quality > 0.1);
-                setForm(prev => ({ ...prev, profileimage: base64 }));
-            };
-        };
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem('U_Token');
-        if (!token) return alert('You must be logged in to submit your profile.');
-
-        try {
-            const endpoint = `${url}api/profile`;
-            const method = isExistingProfile ? 'put' : 'post';
-
-            await axios({
-                method,
-                url: endpoint,
-                data: form,
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            alert(`Profile ${isExistingProfile ? 'updated' : 'created'} successfully!`);
-            setIsExistingProfile(true);
-        } catch (err) {
-            console.error('Submit failed', err);
-            alert('Failed to submit profile');
+        if (name.includes(".")) {
+            const [main, sub] = name.split(".");
+            setForm((prev) => ({
+                ...prev,
+                [main]: { ...prev[main], [sub]: value }
+            }));
+        } else {
+            setForm((prev) => ({ ...prev, [name]: value }));
         }
     };
 
-    if (loading) return <p>Loading profile...</p>;
-    if (error) return <p style={{ color: 'red' }}>{error}</p>;
+    const handleGeoChange = (field, value) => {
+        setForm((prev) => ({
+            ...prev,
+            address: {
+                ...prev.address,
+                geo: { ...prev.address.geo, [field]: value }
+            }
+        }));
+    };
+
+    /* ------------------- IMAGE CHANGE ------------------- */
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setImageFile(file);
+
+        if (file) {
+            setPreviewImg(URL.createObjectURL(file));
+        }
+    };
+
+    /* ------------------- SUBMIT ------------------- */
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const method = exists ? "PUT" : "POST";
+        const formData = new FormData();
+
+        formData.append("phone", form.phone);
+        formData.append("website", form.website);
+        formData.append("address", JSON.stringify(form.address));
+        formData.append("company", JSON.stringify(form.company));
+
+        if (imageFile) formData.append("profileimage", imageFile);
+
+        const res = await fetch(`${url}/api/profile`, {
+            method,
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData
+        });
+
+        const result = await res.json();
+        console.log("SAVE RESULT:", result);
+
+        alert(exists ? "Profile Updated Successfully!" : "Profile Created Successfully!");
+        loadProfile();
+    };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <input name="name" value={form.name} onChange={handleChange} placeholder="Name" />
-            <input name="username" value={form.username} onChange={handleChange} placeholder="Username" />
-            <input name="email" value={form.email} onChange={handleChange} placeholder="Email" />
-            <input type="file" accept="image/*" onChange={handleImage} />
-            {form.profileimage && <img src={form.profileimage} alt="Preview" width={100} />}
-            {/* Address inputs */}
-            <input name="address.street" value={form.address.street} onChange={handleChange} placeholder="Street" />
-            <input name="address.suite" value={form.address.suite} onChange={handleChange} placeholder="Suite" />
-            <input name="address.city" value={form.address.city} onChange={handleChange} placeholder="City" />
-            <input name="address.zipcode" value={form.address.zipcode} onChange={handleChange} placeholder="Zipcode" />
-            <input name="address.geo.lat" value={form.address.geo.lat} onChange={handleChange} placeholder="Latitude" />
-            <input name="address.geo.lng" value={form.address.geo.lng} onChange={handleChange} placeholder="Longitude" />
-            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Phone" />
-            <input name="website" value={form.website} onChange={handleChange} placeholder="Website" />
-            <input name="company.name" value={form.company.name} onChange={handleChange} placeholder="Company Name" />
-            <input name="company.catchPhrase" value={form.company.catchPhrase} onChange={handleChange} placeholder="Catch Phrase" />
-            <input name="company.bs" value={form.company.bs} onChange={handleChange} placeholder="BS" />
+        <div style={container}>
+            <div style={card}>
+                <h2 style={title}>User Information</h2>
 
-            <button type="submit">{isExistingProfile ? 'Update' : 'Add'} Profile</button>
-        </form>
+                <div style={{ textAlign: "center" }}>
+                    {previewImg && (
+                        <img src={previewImg} alt="preview" style={profileImg} />
+                    )}
+                </div>
+
+                <label style={label}>Profile Image</label>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    style={fileInput}
+                />
+
+                <div style={infoBox}>
+                    <p><strong>Name:</strong> {userInfo.name}</p>
+                    <p><strong>Email:</strong> {userInfo.email}</p>
+                    <p><strong>Emp Code:</strong> {userInfo.employeescode}</p>
+                    <p><strong>Department:</strong> {userInfo.department}</p>
+                </div>
+
+                <h2 style={title}>{exists ? "Update Profile" : "Create Profile"}</h2>
+
+                <form onSubmit={handleSubmit} encType="multipart/form-data">
+                    <label style={label}>Phone</label>
+                    <input name="phone" value={form.phone} onChange={handleChange} style={input} />
+
+                    <label style={label}>Website</label>
+                    <input name="website" value={form.website} onChange={handleChange} style={input} />
+
+                    <h3 style={subtitle}>Address</h3>
+
+                    <div style={grid2}>
+                        <input name="address.street" value={form.address.street} onChange={handleChange} style={input} />
+                        <input name="address.suite" value={form.address.suite} onChange={handleChange} style={input} />
+                    </div>
+
+                    <div style={grid2}>
+                        <input name="address.city" value={form.address.city} onChange={handleChange} style={input} />
+                        <input name="address.zipcode" value={form.address.zipcode} onChange={handleChange} style={input} />
+                    </div>
+
+                    <div style={grid2}>
+                        <input value={form.address.geo.lat} onChange={(e) => handleGeoChange("lat", e.target.value)} style={input} />
+                        <input value={form.address.geo.lng} onChange={(e) => handleGeoChange("lng", e.target.value)} style={input} />
+                    </div>
+
+                    <h3 style={subtitle}>Company Details</h3>
+
+                    <input name="company.name" value={form.company.name} onChange={handleChange} style={input} />
+                    <input name="company.catchPhrase" value={form.company.catchPhrase} onChange={handleChange} style={input} />
+                    <input name="company.bs" value={form.company.bs} onChange={handleChange} style={input} />
+
+                    <button type="submit" style={btnPrimary}>
+                        {exists ? "Update Profile" : "Create Profile"}
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 }
 
-export default ProfileForm;
+/* ------------------- STYLES ------------------- */
+const container = {
+    width: "100%",
+    padding: 20,
+    display: "flex",
+    justifyContent: "center",
+};
+
+const card = {
+    width: "100%",
+    maxWidth: 650,
+    background: "#fff",
+    padding: 25,
+    borderRadius: 12,
+    boxShadow: "0 3px 10px rgba(0,0,0,0.12)",
+};
+
+const title = {
+    color: "#333",
+    marginBottom: 10,
+};
+
+const subtitle = {
+    marginTop: 20,
+    color: "#444",
+};
+
+const infoBox = {
+    background: "#f7f7f7",
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 20
+};
+
+const label = {
+    fontWeight: "bold",
+    marginTop: 10,
+};
+
+const profileImg = {
+    width: 130,
+    height: 130,
+    borderRadius: 10,
+    objectFit: "cover",
+    marginBottom: 15,
+    border: "2px solid #ddd"
+};
+
+const fileInput = {
+    width: "100%",
+    marginTop: 10,
+    marginBottom: 20
+};
+
+const grid2 = {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 10
+};
+
+const input = {
+    width: "100%",
+    padding: 10,
+    marginTop: 8,
+    marginBottom: 12,
+    border: "1px solid #ddd",
+    borderRadius: 6
+};
+
+const btnPrimary = {
+    width: "100%",
+    padding: 12,
+    background: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: 6,
+    marginTop: 10,
+    cursor: "pointer",
+    fontSize: 16
+};

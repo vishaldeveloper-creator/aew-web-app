@@ -200,3 +200,15 @@
   min-width: 120px;
   font-weight: 500;
 }
+
+
+/* Spinner for loading */
+.spinner {
+  width: 35px;
+  height: 35px;
+  border: 4px solid #ddd;
+  border-top: 4px solid #0078FF;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 10px;
+}

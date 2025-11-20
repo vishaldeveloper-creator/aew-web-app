@@ -115,7 +115,10 @@ const AssetAcknowledgment = () => {
     <div className="asset-container">
       <h2 className="asset-title">🧾 Asset Acknowledgment</h2>
 
-      {loading && <p>Loading...</p>}
+      {loading && <div style={styles.loadingWrapper}>
+        <div className="spinner"></div>
+        <p>Loading 🧾 Asset...</p>
+      </div>}
       {error && <p className="asset-error">{error}</p>}
       {!loading && assets.length === 0 && <p>No assets found.</p>}
 
@@ -125,7 +128,7 @@ const AssetAcknowledgment = () => {
             <strong>Grand Total: {grandTotal}</strong>
             <ul className="asset-total-list">
               {Object.entries(totals).map(([name, qty]) => (
-                <li key={name}>{name}: {qty}</li>
+                <li key={name}>{name}:{qty}</li>
               ))}
             </ul>
           </div>
@@ -137,7 +140,7 @@ const AssetAcknowledgment = () => {
                 {emp.assets.map(asset => (
                   <li key={asset._id} className="asset-list-item">
                     <div className="asset-label-status">
-                      <span>{asset.name} ({asset.quantity})</span>
+                      <h4>{asset.name}({asset.quantity})</h4>
                       <span>{acknowledged[emp._id][asset.name] ? '✅' : '❌'}</span>
                     </div>
 
@@ -178,3 +181,10 @@ const AssetAcknowledgment = () => {
 };
 
 export default AssetAcknowledgment;
+
+const styles = {
+  loadingWrapper: {
+    textAlign: 'center',
+    marginTop: '30px',
+  },
+};

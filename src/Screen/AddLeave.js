@@ -1,68 +1,84 @@
-import React, { useEffect, useState } from 'react';
-import { url } from '../Baseurl';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { url } from "../Baseurl";
+import { useNavigate } from "react-router-dom";
+import "../Css/AddLeave.css";
 
-const USERS = ['Earn Leave', 'Current Leave', 'Half Day'];
+const LEAVE_TYPES = ["Earn Leave", "Current Leave", "Half Day"];
+const DESIGNATIONS = ["Employee", "Manager", "CEO", "Admin"];
+const DEPARTMENTS = ["Finance", "HR", "IT", "Meter", "Solar", "Sales", "CEO"];
 
-const AddLeave = () => {
+export default function AddLeave() {
     const navigate = useNavigate();
-    const [selectedUser, setSelectedUser] = useState('');
-    const [empoyeecode, setempoyeecode] = useState('');
-    const [employeename, setEmployeeName] = useState('');
-    const [designation, setDesignation] = useState('');
-    const [department, setDepartment] = useState('');
-    const [purpose, setPurpose] = useState('');
-    const [fromDate, setFromDate] = useState('');
-    const [toDate, setToDate] = useState('');
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [error, setError] = useState(false);
 
+    // form data
+    const [leaveType, setLeaveType] = useState("");
+    const [employeeCode, setEmployeeCode] = useState("");
+    const [employeeName, setEmployeeName] = useState("");
+    const [designation, setDesignation] = useState("");
+    const [department, setDepartment] = useState("");
+    const [purpose, setPurpose] = useState("");
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+    const [attachedImage, setAttachedImage] = useState(null);
+    const [loading, setLoading] = useState(false);
 
+    // UI / validation
+    const [errors, setErrors] = useState({});
 
-    const calculateDays = () => {
-        if (selectedUser === 'Half Day') return 'Half Day';
-        if (fromDate && toDate) {
-            const start = new Date(fromDate);
-            const end = new Date(toDate);
-            const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-            return diff > 0 ? `${diff} day(s)` : '0 day';
-        }
-        return '0 day';
-    };
-
-    const formatDate = (dateStr) => {
-        const date = new Date(dateStr);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
+    // -------------- AUTO FILL FROM LOCAL STORAGE -------------- //
     useEffect(() => {
-        try {
-            const usercode = localStorage.getItem("userCode");
-            const username = localStorage.getItem("username");
-            setempoyeecode(usercode);
-            setEmployeeName(username);
-        } catch (err) {
-            console.error("Init error", err);
-            alert('An error occurred.');
+        const userCode = localStorage.getItem("userCode") || "";
+        const username = localStorage.getItem("username") || "";
+        let storedDesignation = localStorage.getItem("role") || "";
+        const storedDepartment = localStorage.getItem("department") || "";
+
+        if (storedDesignation) {
+            storedDesignation =
+                storedDesignation.charAt(0).toUpperCase() +
+                storedDesignation.slice(1).toLowerCase();
         }
+
+        setEmployeeCode(userCode);
+        setEmployeeName(username);
+        if (storedDesignation) setDesignation(storedDesignation);
+        if (storedDepartment) setDepartment(storedDepartment);
     }, []);
 
-    // Reset or sync toDate when leave type changes
+    // Half day logic
     useEffect(() => {
-        if (selectedUser === 'Half Day') {
-            setToDate('');
-        }
-    }, [selectedUser]);
+        if (leaveType === "Half Day") setToDate(fromDate);
+    }, [leaveType, fromDate]);
 
-    // Sync toDate to fromDate for Half Day type
-    useEffect(() => {
-        if (selectedUser === 'Half Day') {
-            setToDate(fromDate);
-        }
-    }, [fromDate, selectedUser]);
+    // duration calculation
+    const durationText = useMemo(() => {
+        if (!fromDate) return "0 day";
+        if (leaveType === "Half Day") return "Half Day";
+
+        if (!toDate) return "0 day";
+
+        const start = new Date(fromDate);
+        const end = new Date(toDate);
+
+        const diff =
+            Math.round(
+                (end.setHours(0, 0, 0, 0) -
+                    start.setHours(0, 0, 0, 0)) /
+                (1000 * 60 * 60 * 24)
+            ) + 1;
+
+        return diff > 0 ? `${diff} day(s)` : "0 day";
+    }, [fromDate, toDate, leaveType]);
+
+    // convert date
+    const formatForBackend = (dateStr) => {
+        if (!dateStr) return "";
+        const d = new Date(dateStr);
+        return `${String(d.getDate()).padStart(2, "0")}/${String(
+            d.getMonth() + 1
+        ).padStart(2, "0")}/${d.getFullYear()}`;
+    };
+
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -107,182 +123,220 @@ const AddLeave = () => {
                     base64 = canvas.toDataURL('image/jpeg', quality);
                 }
 
-                setSelectedImage(base64);
+                setAttachedImage(base64);
             };
         };
     };
 
-    const handleAddLeave = async () => {
-        if (
-            !empoyeecode ||
-            !employeename ||
-            !designation ||
-            !department ||
-            !purpose ||
-            !fromDate ||
-            (!toDate && selectedUser !== 'Half Day') ||
-            !selectedUser
-        ) {
-            setError(true);
-            alert("Please fill all fields correctly.");
-            return;
-        }
 
-        const duration = calculateDays();
+    // ------------------ INPUT VALIDATION ------------------ //
+    const validateFields = () => {
+        let newErrors = {};
+
+        if (!leaveType) newErrors.leaveType = "Please select leave type.";
+        if (!employeeCode) newErrors.employeeCode = "Employee code is required.";
+        if (!employeeName) newErrors.employeeName = "Employee name is required.";
+        if (!designation) newErrors.designation = "Designation is required.";
+        if (!department) newErrors.department = "Department is required.";
+        if (!purpose) newErrors.purpose = "Purpose is required.";
+        if (!fromDate) newErrors.fromDate = "From date is required.";
+        if (leaveType !== "Half Day" && !toDate)
+            newErrors.toDate = "To date is required.";
+
+        if (fromDate && toDate && new Date(fromDate) > new Date(toDate))
+            newErrors.toDate = "To date cannot be earlier than From date.";
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
+
+    // ------------------ SUBMIT HANDLER ------------------ //
+    const onSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!validateFields()) return;
+
+        const payload = {
+            leavetype: leaveType,
+            name: employeeName,
+            employeescode: employeeCode,
+            designation,
+            department,
+            purpose,
+            leaveimage: attachedImage || "",
+            fromdate: formatForBackend(fromDate),
+            todate: leaveType === "Half Day" ? "" : formatForBackend(toDate),
+            duration: durationText
+        };
 
         try {
+            setLoading(true);
             const token = localStorage.getItem("U_Token");
-            const response = await fetch(`${url}/submit`, {
-                method: 'POST',
+
+            await axios.post(`${url}/submit`, payload, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    leavetype: selectedUser,
-                    name: employeename,
-                    employeescode: empoyeecode,
-                    designation,
-                    department,
-                    purpose,
-                    leaveimage: selectedImage,
-                    fromdate: formatDate(fromDate),
-                    todate: selectedUser === 'Half Day' ? '' : formatDate(toDate),
-                    duration
-                })
+                    Authorization: token ? `Bearer ${token}` : "",
+                    "Content-Type": "application/json"
+                }
             });
 
-            const result = await response.json();
-            alert('Leave Submitted Successfully!');
-            navigate('/');
-            console.log(result);
-            setError(false);
+            alert("Leave submitted successfully.");
+            navigate("/");
+
         } catch (err) {
-            console.error(err);
-            alert('Something went wrong.');
+            alert(err.response?.data?.error || "Submission failed.");
+        } finally {
+            setLoading(false);
         }
     };
 
+    // ------------------ UI ------------------ //
     return (
-        <div className="container">
-            <h2 className="header">LEAVE REQUEST</h2>
+        <div className="addleave-page">
+            <form className="addleave-card" onSubmit={onSubmit} noValidate>
+                <h1 className="al-title">Leave Request</h1>
 
-            <label>Leave Type *</label>
-            {error && !selectedUser && <span className="error">Please select leave type</span>}
-            <select
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
-            >
-                <option value="">Select</option>
-                {USERS.map((user, index) => (
-                    <option key={index} value={user}>{user}</option>
-                ))}
-            </select>
+                {/* LEAVE TYPE */}
+                <label className="al-label">Leave Type *</label>
+                <select
+                    className={`al-input ${errors.leaveType ? "al-error" : ""}`}
+                    value={leaveType}
+                    onChange={(e) => setLeaveType(e.target.value)}
+                >
+                    <option value="">Select leave type</option>
+                    {LEAVE_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                            {t}
+                        </option>
+                    ))}
+                </select>
+                {errors.leaveType && <p className="al-err-text">{errors.leaveType}</p>}
 
-            <label>Employee Code *</label>
-            {error && !empoyeecode && <span className="error">Enter code</span>}
-            <input type="text" value={empoyeecode} onChange={(e) => setempoyeecode(e.target.value)} />
+                {/* EMPLOYEE DETAILS */}
+                <div className="al-row">
+                    <div className="al-col">
+                        <label className="al-label">Employee Code *</label>
+                        <input
+                            className={`al-input ${errors.employeeCode ? "al-error" : ""}`}
+                            value={employeeCode}
+                            onChange={(e) => setEmployeeCode(e.target.value)}
+                        />
+                        {errors.employeeCode && (
+                            <p className="al-err-text">{errors.employeeCode}</p>
+                        )}
+                    </div>
 
-            <label>Employee Name *</label>
-            {error && !employeename && <span className="error">Enter name</span>}
-            <input type="text" value={employeename} onChange={(e) => setEmployeeName(e.target.value)} />
+                    <div className="al-col">
+                        <label className="al-label">Employee Name *</label>
+                        <input
+                            className={`al-input ${errors.employeeName ? "al-error" : ""}`}
+                            value={employeeName}
+                            onChange={(e) => setEmployeeName(e.target.value)}
+                        />
+                        {errors.employeeName && (
+                            <p className="al-err-text">{errors.employeeName}</p>
+                        )}
+                    </div>
+                </div>
 
-            <label>Designation *</label>
-            {error && !designation && <span className="error">Enter designation</span>}
-            {/* <input type="text" value={designation} onChange={(e) => setDesignation(e.target.value)} /> */}
+                {/* DESIGNATION + DEPARTMENT */}
+                <div className="al-row">
+                    <div className="al-col">
+                        <label className="al-label">Designation *</label>
+                        <select
+                            className={`al-input ${errors.designation ? "al-error" : ""}`}
+                            value={designation}
+                            onChange={(e) => setDesignation(e.target.value)}
+                        >
+                            <option value="">Select designation</option>
+                            {DESIGNATIONS.map((d) => (
+                                <option key={d} value={d}>
+                                    {d}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.designation && (
+                            <p className="al-err-text">{errors.designation}</p>
+                        )}
+                    </div>
 
-            <select
-                name="Designation"
-                value={designation}
-                onChange={(e) => setDesignation(e.target.value)}
-            >
-                <option value="employee">Employee</option>
-                <option value="manager">Manager</option>
-                <option value="ceo">CEO</option>
-                <option value="admin">Admin</option>
-            </select>
+                    <div className="al-col">
+                        <label className="al-label">Department *</label>
+                        <select
+                            className={`al-input ${errors.department ? "al-error" : ""}`}
+                            value={department}
+                            onChange={(e) => setDepartment(e.target.value)}
+                        >
+                            <option value="">Select department</option>
+                            {DEPARTMENTS.map((d) => (
+                                <option key={d} value={d}>
+                                    {d}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.department && (
+                            <p className="al-err-text">{errors.department}</p>
+                        )}
+                    </div>
+                </div>
 
-            <label>Department *</label>
-            {error && !department && <span className="error">Enter department</span>}
-            {/* <input type="text" value={department} onChange={(e) => setDepartment(e.target.value)} /> */}
-            <select
-                name="department"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-            >
-                <option value="">Select Department</option>
-                <option value="Finance">Finance</option>
-                <option value="HR">HR</option>
-                <option value="IT">IT</option>
-                <option value="Meter">Meter</option>
-                <option value="Solar">Solar</option>
-                <option value="Sales">Sales</option>
-                <option value="CEO">CEO</option>
-            </select>
+                {/* PURPOSE */}
+                <label className="al-label">Purpose *</label>
+                <input
+                    className={`al-input ${errors.purpose ? "al-error" : ""}`}
+                    value={purpose}
+                    onChange={(e) => setPurpose(e.target.value)}
+                    placeholder="Reason for leave"
+                />
+                {errors.purpose && <p className="al-err-text">{errors.purpose}</p>}
 
+                {/* DATES */}
+                <div className="al-row">
+                    <div className="al-col">
+                        <label className="al-label">From Date *</label>
+                        <input
+                            type="date"
+                            className={`al-input ${errors.fromDate ? "al-error" : ""}`}
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                        />
+                        {errors.fromDate && (
+                            <p className="al-err-text">{errors.fromDate}</p>
+                        )}
+                    </div>
 
+                    {leaveType !== "Half Day" && (
+                        <div className="al-col">
+                            <label className="al-label">To Date *</label>
+                            <input
+                                type="date"
+                                className={`al-input ${errors.toDate ? "al-error" : ""}`}
+                                value={toDate}
+                                min={fromDate}
+                                onChange={(e) => setToDate(e.target.value)}
+                            />
+                            {errors.toDate && (
+                                <p className="al-err-text">{errors.toDate}</p>
+                            )}
+                        </div>
+                    )}
+                </div>
 
-            <label>Purpose *</label>
-            {error && !purpose && <span className="error">Enter purpose</span>}
-            <input type="text" value={purpose} onChange={(e) => setPurpose(e.target.value)} />
+                <div className="al-meta">
+                    <strong>Duration:</strong> {durationText}
+                </div>
 
-            {/* Date Fields */}
-            <label>{selectedUser === 'Half Day' ? 'Date *' : 'From Date *'}</label>
-            {error && !fromDate && <span className="error">Select date</span>}
-            <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => {
-                    setFromDate(e.target.value);
-                    if (toDate && new Date(e.target.value) > new Date(toDate)) {
-                        setToDate('');
-                    }
-                }}
-            />
+                {/* FILE UPLOAD */}
+                <label className="al-label">File Attachment (optional)</label>
+                {/* <input className="al-input" type="file" accept="image/*" /> */}
+                <input className="al-input" type="file" accept="image/*" onChange={handleFileChange} />
 
-            {/* To Date for non-Half Day */}
-            {selectedUser !== 'Half Day' && (
-                <>
-                    <label>To Date *</label>
-                    {error && !toDate && <span className="error">Select date</span>}
-                    <input
-                        type="date"
-                        value={toDate}
-                        min={fromDate}
-                        disabled={!fromDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                    />
-                </>
-            )}
-
-            {fromDate && (selectedUser === 'Half Day' || toDate) && (
-                <p>
-                    <strong>Total Leave:</strong>{' '}
-                    {selectedUser === 'Half Day' ? formatDate(fromDate) + ' - Half Day' : calculateDays()}
-                </p>
-            )}
-
-            <label>File Attachment (optional)</label>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
-
-            {selectedImage && (
-                <img src={selectedImage} alt="Preview" style={styles.image} />
-            )}
-
-            <button className="submitBtn" onClick={handleAddLeave}>Submit</button>
+                {/* SUBMIT */}
+                <button className="al-submit" disabled={loading}>
+                    {loading ? "Submitting..." : "Submit Leave"}
+                </button>
+            </form>
         </div>
     );
-};
-// Image preview styles
-const styles = {
-    image: {
-        width: '250px',
-        height: '290px',
-        objectFit: 'cover',
-        borderRadius: '8px',
-        border: '1px solid #ddd',
-        marginTop: '10px'
-    }
-};
-
-export default AddLeave;
+}

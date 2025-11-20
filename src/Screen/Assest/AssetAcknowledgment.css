@@ -1,0 +1,138 @@
+/* PAGE CONTAINER */
+.asset-container {
+    padding: 20px;
+    max-width: 1100px;
+    margin: auto;
+    font-family: Arial, sans-serif;
+}
+
+/* TITLE */
+.asset-title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* ERROR */
+.asset-error {
+    color: red;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* SUMMARY BOX */
+.asset-summary {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.asset-total-list {
+    margin-top: 10px;
+    list-style: none;
+    padding: 0;
+}
+
+/* RESPONSIVE GRID */
+.asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+/* EMPLOYEE CARD */
+.asset-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.asset-emp-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+/* ASSET LIST ITEMS */
+.asset-list {
+    list-style: none;
+    padding: 0;
+}
+
+.asset-list-item {
+    background: #fafafa;
+    margin-bottom: 12px;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.asset-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.asset-name {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.asset-checkbox {
+    width: 20px;
+    height: 20px;
+}
+
+/* IMAGE */
+.asset-thumb {
+    width: 100%;
+    max-width: 150px;
+    margin-top: 10px;
+    border-radius: 6px;
+    display: block;
+}
+
+/* STATUS ICON */
+.asset-status {
+    font-size: 22px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* SUBMIT BUTTON */
+.asset-submit-btn {
+    width: 100%;
+    background: #007bff;
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.asset-submit-btn:disabled {
+    background: gray;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 600px) {
+    .asset-title {
+        font-size: 22px;
+    }
+
+    .asset-card {
+        padding: 12px;
+    }
+
+    .asset-name {
+        font-size: 14px;
+    }
+
+    .asset-checkbox {
+        width: 18px;
+        height: 18px;
+    }
+}

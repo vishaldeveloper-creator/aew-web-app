@@ -34,23 +34,16 @@ const LeaveCard = ({ leave, onUpdateStatus, admin }) => {
         <div style={styles.card}>
             <div style={styles.contentRow}>
                 <div style={styles.left}>
-                    <h3 style={styles.title}>
-                        {leave.name} ({leave.employeescode})
-                    </h3>
+
+                    <h3 style={styles.title}>{leave.name} ({leave.employeescode})</h3>
+                    <span style={{ ...styles.badge, backgroundColor: getStatusColor(leave.status) }}> {leave.status} </span>
+
                     <p>{leave.designation} - {leave.department}</p>
                     <p>Leave Type: {leave.leavetype}</p>
                     <p>{leave.fromdate} to {leave.todate}</p>
                     <p>Duration: {leave.duration}</p>
                     <p>Purpose: {leave.purpose}</p>
 
-                    <span
-                        style={{
-                            ...styles.badge,
-                            backgroundColor: getStatusColor(leave.status),
-                        }}
-                    >
-                        {leave.status}
-                    </span>
 
                     {admin === "manager" && (
                         <div style={styles.buttonRow}>
@@ -86,12 +79,13 @@ const LeaveCard = ({ leave, onUpdateStatus, admin }) => {
 
 const styles = {
     card: {
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        padding: '16px',
-        marginBottom: '16px',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-        backgroundColor: '#fff',
+        background: "#fff",
+        padding: "15px",
+        borderRadius: "10px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "10px",
     },
     contentRow: {
         display: 'flex',
@@ -124,12 +118,20 @@ const styles = {
         borderRadius: '4px',
         cursor: 'pointer',
     },
+    // image: {
+    //     width: '430px',
+    //     height: '298px',
+    //     objectFit: 'cover',
+    //     borderRadius: '8px',
+    //     border: '1px solid #ddd',
+    // },
+
     image: {
-        width: '430px',
-        height: '298px',
-        objectFit: 'cover',
-        borderRadius: '8px',
-        border: '1px solid #ddd',
+        width: "100%",          // Full width of the card
+        height: "auto",         // Auto height to maintain aspect ratio
+        maxHeight: "300px",     // Prevent too tall images
+        objectFit: "cover",     // Crop nicely
+        borderRadius: "8px",
     },
 };
 

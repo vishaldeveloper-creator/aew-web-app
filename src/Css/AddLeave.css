@@ -1,0 +1,128 @@
+/* AddLeave.css - responsive, clean form */
+.addleave-page {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+.addleave-card {
+    width: 100%;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(10, 20, 40, 0.05);
+}
+
+.al-title {
+    margin: 0 0 1px;
+    font-size: 22px;
+    text-align: center;
+    color: #0f1724;
+}
+
+.al-err-text {
+    margin: 0 0 18px;
+    font-size: 14px;
+    text-align: center;
+    color: #dd0000;
+}
+
+.al-form-error {
+    background: #fff4f4;
+    color: #a12;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid #ffd6d6;
+}
+
+.al-label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #334155;
+}
+
+.al-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e6e9ef;
+    font-size: 14px;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.al-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.al-col {
+    flex: 1;
+    min-width: 220px;
+}
+
+.al-meta {
+    display: flex;
+    gap: 20px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    color: #374151;
+}
+
+.al-image-wrap {
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.al-image {
+    width: 220px;
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    object-fit: cover;
+}
+
+/* Submit button */
+.al-submit {
+    width: 100%;
+    margin-top: 18px;
+    padding: 12px;
+    background: linear-gradient(180deg, #0f62ff, #0047d1);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(15, 98, 255, 0.12);
+}
+
+.al-submit[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* small screens */
+@media (max-width: 700px) {
+    .al-row {
+        flex-direction: column;
+    }
+
+    .al-col {
+        min-width: 100%;
+    }
+
+    .al-image {
+        width: 180px;
+    }
+}

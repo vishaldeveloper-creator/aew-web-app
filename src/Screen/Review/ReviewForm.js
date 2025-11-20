@@ -1,329 +1,427 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { url } from "../../Baseurl";
+// src/components/ReviewForm.jsx
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { url } from '../../Baseurl';
+import { v4 as uuidv4 } from 'uuid';
 
 const predefinedKPAs = [
-    {
-        kpa: "Project Execution & Timelines",
-        responsibility: "Complete meter installations as per defined scope and timeline",
-    },
-    {
-        kpa: "Team Management",
-        responsibility: "Lead, supervise and support field teams for day-to-day activities",
-    },
-    {
-        kpa: "Material & Inventory Control",
-        responsibility: "Ensure proper stock of meters, tools, etc at each site",
-    },
-    {
-        kpa: "Safety & Compliance",
-        responsibility: "Ensure field team uses proper PPE, and safety SOPs are followed",
-    },
-    {
-        kpa: "DISCOM liasioning ,MIS & Coordination",
-        responsibility:
-            "Maintain regular liasioning with DISCOM for NOCs, updates, Deposit ,etc approvals",
-    },
-    {
-        kpa: "QC & Serve",
-        responsibility: "Ensure QC complete and CI / MI updates",
-    },
+    { title: "Project Execution & Timelines", responsibility: "Complete meter installations as per defined scope and timeline" },
+    { title: "Team Management", responsibility: "Lead, supervise and support field teams for day-to-day activities" },
+    { title: "Material & Inventory Control", responsibility: "Ensure proper stock of meters, tools, etc at each site" },
+    { title: "Safety & Compliance", responsibility: "Ensure field team uses proper PPE, and safety SOPs are followed" },
+    { title: "DISCOM Liasioning, MIS & Coordination", responsibility: "Maintain regular liasioning with DISCOM for NOCs, updates etc" },
+    { title: "QC & Serve", responsibility: "Ensure QC complete and CI / MI updates" },
 ];
 
-const ReviewForm = () => {
+export default function ReviewForm() {
     const [employees, setEmployees] = useState([]);
+    const [role, setRole] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
-        employeeId: "",
-        employeeName: "",
-        employeescode: "",
-        project: "",
-        designation: "",
-        department: "",
-        location: "",
-        reviewPeriod: { from: "", to: "" },
-        ratings: [], // start empty
+        employeeId: '',
+        employeeName: '',
+        employeescode: '',
+        project: '',
+        designation: '',
+        department: '',
+        location: '',
+        reviewPeriodFrom: '',
+        ratings: []
     });
-    console.log({ formData })
 
-    const [kpaIndex, setKpaIndex] = useState(0); // track which KPA to add next
 
-    // 🧠 Fetch employees for manager
-    const fetchEmployees = async () => {
-        try {
-            const token = localStorage.getItem("U_Token");
-            const res = await axios.get(`${url}/api/manager-employees`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setEmployees(res.data);
-        } catch (error) {
-            console.error("Error fetching employees:", error);
+    // -------------------------------------------------------
+    // Load Token Role
+    // -------------------------------------------------------
+    useEffect(() => {
+        const token = localStorage.getItem("U_Token");
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                setRole(payload.role || "");
+            } catch (e) { }
         }
-    };
+    }, []);
 
-    const handleSelectEmployee = (id) => {
-        const emp = employees.find((e) => e._id === id);
-        if (emp) {
-            setFormData({
-                ...formData,
-                employeeId: emp._id,
-                employeeName: emp.name,
-                employeescode: emp.employeescode,
-                department: emp.department,
-                location: emp.location,
-                project: emp.project,
-                designation: emp.designation,
-            });
-        }
-    };
-
-    const handleRatingChange = (index, field, value) => {
-        const updated = [...formData.ratings];
-        updated[index][field] = value;
-        setFormData({ ...formData, ratings: updated });
-    };
-
-    // ➕ Add KPA sequentially
-    const addKPA = () => {
-        if (kpaIndex < predefinedKPAs.length) {
-            const nextKPA = predefinedKPAs[kpaIndex];
-            setFormData({
-                ...formData,
-                ratings: [
-                    ...formData.ratings,
-                    {
-                        ...nextKPA,
-                        employeeRating: "",
-                        managerRating: "",
-                        managementRating: "",
-                        comment: "",
-                    },
-                ],
-            });
-            setKpaIndex(kpaIndex + 1); // move to next KPA
-        } else {
-            alert("All KPAs have been added!");
-        }
-    };
-
-    const handleSubmit = async () => {
-        try {
-            const token = localStorage.getItem("U_Token");
-            console.log("Submitting:", formData);
-            await axios.post(`${url}/assign-ratings`, formData, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            alert("Review submitted successfully!");
-            // Reset form
-            setFormData({
-                employeeId: "",
-                employeeName: "",
-                employeescode: "",
-                project: "",
-                designation: "",
-                department: "",
-                location: "",
-                reviewPeriod: { from: "", to: "" },
-                ratings: [],
-            });
-            setKpaIndex(0);
-        } catch (error) {
-            console.error(error);
-            alert("Error submitting review.");
-        }
-    };
-
+    // -------------------------------------------------------
+    // Fetch Employees
+    // -------------------------------------------------------
     useEffect(() => {
         fetchEmployees();
     }, []);
 
+    async function fetchEmployees() {
+        try {
+            const token = localStorage.getItem('U_Token');
+            const res = await axios.get(`${url}/api/manager-employees`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setEmployees(res.data || []);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // -------------------------------------------------------
+    // Handle Employee Select
+    // -------------------------------------------------------
+    function handleSelectEmployee(id) {
+        const selected = employees.find(e => e._id === id);
+
+        if (!selected) return;
+
+        setFormData(prev => ({
+            ...prev,
+            employeeId: id,
+            employeeName: selected.name || "",
+            employeescode: selected.employeescode || "",
+            project: selected.project || "",
+            designation: selected.designation || "",
+            department: selected.department || "",
+            location: selected.location || ""
+        }));
+    }
+
+    // -------------------------------------------------------
+    // Convert Date → "Nov 2025"
+    // -------------------------------------------------------
+    function generateReviewPeriod() {
+        if (!formData.reviewPeriodFrom) return "";
+        const d = new Date(formData.reviewPeriodFrom + "-01");
+        return d.toLocaleString("en-US", { month: "short", year: "numeric" });
+    }
+
+    // -------------------------------------------------------
+    // Add KPA
+    // -------------------------------------------------------
+    function addKPA() {
+        if (formData.ratings.length >= predefinedKPAs.length) {
+            alert("All KPAs added");
+            return;
+        }
+
+        const next = predefinedKPAs[formData.ratings.length];
+
+        setFormData(prev => ({
+            ...prev,
+            ratings: [
+                ...prev.ratings,
+                {
+                    kpaId: uuidv4(),
+                    kpaTitle: next.title,
+                    kpaResponsibility: next.responsibility,
+                    employeeRating: "",
+                    managerRating: "",
+                    managementRating: "",
+                    comment: ""
+                }
+            ]
+        }));
+    }
+
+    // -------------------------------------------------------
+    // Rating Change
+    // -------------------------------------------------------
+    function handleRatingChange(index, field, value) {
+        setFormData(prev => {
+            const updated = [...prev.ratings];
+            updated[index] = { ...updated[index], [field]: value };
+            return { ...prev, ratings: updated };
+        });
+    }
+
+    // -------------------------------------------------------
+    // Load existing ratings
+    // -------------------------------------------------------
+    async function loadExistingRatings() {
+        if (!formData.employeeId) return alert("Select employee");
+        if (!formData.reviewPeriodFrom) return alert("Select review period");
+
+        setLoading(true);
+
+        try {
+            const reviewPeriod = generateReviewPeriod();
+            const token = localStorage.getItem("U_Token");
+
+            const res = await axios.get(`${url}/show-ratings`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const docs = res.data || [];
+
+            const match = docs.find(
+                d => d.userId === formData.employeeId && d.reviewPeriod === reviewPeriod
+            );
+
+            if (!match) {
+                alert("No existing ratings found.");
+                return;
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                ratings: match.ratings.map(k => ({
+                    kpaId: k.kpaId,
+                    kpaTitle: k.kpaTitle,
+                    kpaResponsibility: k.kpaResponsibility,
+                    employeeRating: k.employeeRating || "",
+                    managerRating: k.managerRating || "",
+                    managementRating: k.managementRating || "",
+                    comment:
+                        k.employeeRatingComment ||
+                        k.managerRatingComment ||
+                        k.managementRatingComment ||
+                        ""
+                }))
+            }));
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // -------------------------------------------------------
+    // Submit Ratings
+    // -------------------------------------------------------
+    async function handleSubmit() {
+        if (!formData.employeeId) return alert("Select employee");
+        if (!formData.reviewPeriodFrom) return alert("Select review period");
+
+        const reviewPeriod = generateReviewPeriod();
+        const token = localStorage.getItem("U_Token");
+
+        try {
+            for (const r of formData.ratings) {
+                const ratingValue =
+                    role === "employee"
+                        ? r.employeeRating
+                        : role === "manager"
+                            ? r.managerRating
+                            : r.managementRating;
+
+                await axios.put(
+                    `${url}/assign-ratings`,
+                    {
+                        employeeId: formData.employeeId,
+                        reviewPeriod,
+                        kpaId: r.kpaId,
+                        kpaTitle: r.kpaTitle,
+                        kpaResponsibility: r.kpaResponsibility,
+                        ratingValue,
+                        comment: r.comment
+                    },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            }
+
+            alert("Ratings saved successfully!");
+        } catch (err) {
+            alert("Error submitting ratings");
+        }
+    }
+
+    // -------------------------------------------------------
+    // UI
+    // -------------------------------------------------------
     return (
-        <div style={{ padding: 20 }}>
+        <div style={styles.container}>
             <h2>Monthly Performance Review</h2>
 
-            <label>Select Employee:</label>
-            <select
-                value={formData.employeeId}
-                onChange={(e) => handleSelectEmployee(e.target.value)}
-            >
-                <option value="">-- Select --</option>
-                {employees.map((emp) => (
-                    <option key={emp._id} value={emp._id}>
-                        {emp.name} ({emp.employeescode})
-                    </option>
-                ))}
-            </select>
+            {/* Row 1 */}
+            <div style={styles.row}>
+                <div style={{ flex: 1 }}>
+                    <label>Select Employee:</label>
+                    <select
+                        value={formData.employeeId}
+                        onChange={e => handleSelectEmployee(e.target.value)}
+                        style={styles.input}
+                    >
+                        <option value="">-- Select Employee --</option>
+                        {employees.map(emp => (
+                            <option key={emp._id} value={emp._id}>
+                                {emp.name} ({emp.employeescode})
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
-            <div style={{ marginTop: 20 }}>
-                <input value={formData.employeeName} placeholder="Name" disabled />
-                <input value={formData.employeescode} placeholder="Code" disabled />
-                <input value={formData.project} placeholder="Project" disabled />
-                <input value={formData.designation} placeholder="Designation" disabled />
-                <input value={formData.department} placeholder="Department" disabled />
-                <input value={formData.location} placeholder="Location" disabled />
+                <div style={{ width: 220 }}>
+                    <label>Review Period</label>
+                    <input
+                        type="month"
+                        style={styles.input}
+                        value={formData.reviewPeriodFrom}
+                        onChange={e => setFormData(prev => ({ ...prev, reviewPeriodFrom: e.target.value }))}
+                    />
+                </div>
+
+                <div style={{ display: "flex", gap: 8, marginLeft: 12, justifyContent: 'center' }}>
+                    <button style={styles.btn} onClick={addKPA}>
+                        + Add KPA
+                    </button>
+                    <button style={styles.btn} onClick={loadExistingRatings}>
+                        {loading ? "Loading..." : "Load Existing"}
+                    </button>
+                </div>
             </div>
 
-            <h3>Review Period</h3>
-            <input
-                type="date"
-                value={formData.reviewPeriod.from}
-                onChange={(e) =>
-                    setFormData({
-                        ...formData,
-                        reviewPeriod: { ...formData.reviewPeriod, from: e.target.value },
-                    })
-                }
-            />
-            <input
-                type="date"
-                value={formData.reviewPeriod.to}
-                onChange={(e) =>
-                    setFormData({
-                        ...formData,
-                        reviewPeriod: { ...formData.reviewPeriod, to: e.target.value },
-                    })
-                }
-            />
-
-            <h3>KPAs</h3>
-            <button
-                onClick={addKPA}
-                style={{
-                    marginBottom: "10px",
-                    padding: "6px 12px",
-                    background: "#16a34a",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                }}
-            >
-                + Add KPA
-            </button>
-
-            {formData.ratings.length > 0 && (
-                <table
-                    style={{
-                        width: "100%",
-                        borderCollapse: "collapse",
-                        marginTop: "10px",
-                    }}
-                >
-                    <thead>
-                        <tr style={{ background: "#f1f5f9" }}>
-                            <th style={th}>KPA</th>
-                            <th style={th}>Responsibility</th>
-                            <th style={th}>Employee Rating</th>
-                            <th style={th}>Manager Rating</th>
-                            <th style={th}>Management Rating</th>
-                            <th style={th}>Comment</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {formData.ratings.map((r, index) => (
-                            <tr key={index}>
-                                <td style={td}>{r.kpa}</td>
-                                <td style={td}>{r.responsibility}</td>
-                                <td style={td}>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="5"
-                                        value={r.employeeRating}
-                                        onChange={(e) =>
-                                            handleRatingChange(index, "employeeRating", e.target.value)
-                                        }
-                                        placeholder="1-5"
-                                    />
-                                </td>
-                                <td style={td}>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="5"
-                                        value={r.managerRating}
-                                        onChange={(e) =>
-                                            handleRatingChange(index, "managerRating", e.target.value)
-                                        }
-                                        placeholder="1-5"
-                                    />
-                                </td>
-                                <td style={td}>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="5"
-                                        value={r.managementRating}
-                                        onChange={(e) =>
-                                            handleRatingChange(index, "managementRating", e.target.value)
-                                        }
-                                        placeholder="1-5"
-                                    />
-                                </td>
-                                <td style={td}>
-                                    <input
-                                        type="text"
-                                        value={r.comment}
-                                        onChange={(e) =>
-                                            handleRatingChange(index, "comment", e.target.value)
-                                        }
-                                        placeholder="Comment"
-                                    />
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            {/* Employee Info */}
+            {formData.employeeId && (
+                <div style={styles.employeeInfo}>
+                    <input style={styles.input} disabled value={formData.employeeName} />
+                    <input style={styles.input} disabled value={formData.employeescode} />
+                    <input style={styles.input} disabled value={formData.project} />
+                    <input style={styles.input} disabled value={formData.designation} />
+                    <input style={styles.input} disabled value={formData.department} />
+                    <input style={styles.input} disabled value={formData.location} />
+                </div>
             )}
 
-            <button
-                onClick={handleSubmit}
-                style={{
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    background: "#2563eb",
-                    color: "white",
-                    fontWeight: "bold",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                }}
-            >
-                Submit Review
-            </button>
-            <button
-                onClick={handleSubmit}
-                style={{
-                    marginTop: "20px",
-                    padding: "10px 20px",
-                    background: "#2563eb",
-                    color: "white",
-                    fontWeight: "bold",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                }}
-            >
-                AAD Button
+            {/* KPAs */}
+            {formData.ratings.map((r, i) => (
+                <div key={r.kpaId} style={styles.kpaRow}>
+                    <div style={styles.kpaTitle}>{r.kpaTitle}</div>
+                    <div style={styles.kpaResp}>{r.kpaResponsibility}</div>
+
+                    <div style={styles.ratingBox}>
+                        {role === "employee" && (
+                            <input
+                                type="number"
+                                min="1"
+                                max="5"
+                                style={styles.input}
+                                value={r.employeeRating}
+                                onChange={e =>
+                                    handleRatingChange(i, "employeeRating", e.target.value)
+                                }
+                            />
+                        )}
+                        {role === "manager" && (
+                            <input
+                                type="number"
+                                min="1"
+                                max="5"
+                                style={styles.input}
+                                value={r.managerRating}
+                                onChange={e =>
+                                    handleRatingChange(i, "managerRating", e.target.value)
+                                }
+                            />
+                        )}
+                        {(role === "hradmin" || role === "ceo") && (
+                            <input
+                                type="number"
+                                min="1"
+                                max="5"
+                                style={styles.input}
+                                value={r.managementRating}
+                                onChange={e =>
+                                    handleRatingChange(i, "managementRating", e.target.value)
+                                }
+                            />
+                        )}
+                    </div>
+
+                    <div style={styles.commentBox}>
+                        <input
+                            type="text"
+                            style={styles.input}
+                            placeholder="Comment"
+                            value={r.comment}
+                            onChange={e =>
+                                handleRatingChange(i, "comment", e.target.value)
+                            }
+                        />
+                    </div>
+                </div>
+            ))}
+
+            {/* Submit */}
+            <button style={styles.submitBtn} onClick={handleSubmit}>
+                Submit Ratings
             </button>
         </div>
     );
-};
+}
 
-// styles for table cells
-const th = {
-    textAlign: "left",
-    padding: "10px",
-    fontSize: "13px",
-    fontWeight: "800",
-    border: "1px solid #e2e8f0",
-};
+// -------------------------------------------------------
+// INLINE STYLES (All CSS moved here)
+// -------------------------------------------------------
+const styles = {
+    container: {
+        maxWidth: "1100px",
+        margin: "18px auto",
+        padding: "18px",
+        background: "#fff",
+        borderRadius: "8px",
+        boxShadow: "0 4px 18px rgba(0,0,0,0.04)",
+        fontFamily: "Arial, sans-serif"
+    },
+    row: {
+        display: "flex",
+        gap: "12px",
+        alignItems: "center",
+        flexWrap: "wrap",
 
-const td = {
-    padding: "8px",
-    fontSize: "13px",
-    border: "1px solid #e2e8f0",
+    },
+    input: {
+        width: "100%",
+        padding: "8px 10px",
+        border: "1px solid #ddd",
+        borderRadius: "6px",
+        boxSizing: "border-box"
+    },
+    employeeInfo: {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(160px,1fr))",
+        gap: "10px",
+        marginTop: "12px"
+    },
+    btn: {
+        padding: "10px 10px",
+        background: "#1976d2",
+        color: "white",
+        border: "none",
+        borderRadius: "6px",
+        cursor: "pointer"
+    },
+    kpaRow: {
+        display: "flex",
+        gap: "12px",
+        flexWrap: "wrap",
+        alignItems: "center",
+        padding: "14px",
+        borderRadius: "10px",
+        border: "1px solid #eee",
+        marginTop: "10px",
+        background: "#fafafa"
+    },
+    kpaTitle: {
+        flex: "1 1 180px",
+        fontWeight: "600",
+        minWidth: "160px"
+    },
+    kpaResp: {
+        flex: "2 1 300px",
+        minWidth: "200px",
+        color: "#444",
+        fontSize: "13px"
+    },
+    ratingBox: {
+        flex: "0 0 120px",
+        minWidth: "120px"
+    },
+    commentBox: {
+        flex: "1 1 240px",
+        minWidth: "180px"
+    },
+    submitBtn: {
+        padding: "10px 14px",
+        background: "#28a745",
+        color: "white",
+        border: "none",
+        borderRadius: "8px",
+        cursor: "pointer",
+        marginTop: "12px"
+    }
 };
-
-export default ReviewForm;
