@@ -1,0 +1,165 @@
+/* Container */
+.task-list-container {
+    padding: 20px;
+    background-color: #f5f6fa;
+    min-height: 100vh;
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.task-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.task-list-header h2 {
+    font-size: 28px;
+    color: #111827;
+}
+
+.btn-refresh {
+    padding: 8px 16px;
+    background: #0ea5e9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-refresh:hover {
+    background: #0284c7;
+}
+
+/* Grid */
+.task-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Task Card */
+.task-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+}
+
+.task-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.task-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.task-desc {
+    font-size: 14px;
+    color: #4b5563;
+    margin-bottom: 12px;
+    min-height: 40px;
+}
+
+.task-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.task-status {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: white;
+    text-transform: capitalize;
+}
+
+.task-status.pending {
+    background: #f97316;
+}
+
+.task-status.in-progress {
+    background: #3b82f6;
+}
+
+.task-status.completed {
+    background: #10b981;
+}
+
+/* Load More */
+.btn-load-more {
+    display: block;
+    margin: 30px auto 0 auto;
+    padding: 12px 24px;
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.btn-load-more:hover {
+    background: #2563eb;
+}
+
+/* Floating Add Task Button */
+.btn-add-task {
+    position: fixed;
+    right: 30px;
+    bottom: 40px;
+    padding: 18px 24px;
+    border-radius: 50%;
+    font-size: 28px;
+    font-weight: bold;
+    background: #0ea5e9;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: 0.2s;
+}
+
+.btn-add-task:hover {
+    background: #0284c7;
+}
+
+/* Loading / No Tasks */
+.loading-text,
+.no-tasks {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .task-list-container {
+        padding: 15px;
+    }
+
+    .task-list-header h2 {
+        font-size: 24px;
+    }
+
+    .task-card {
+        padding: 15px;
+    }
+}

@@ -1,90 +1,90 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { url } from "../Baseurl";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../Css/DashboardScreen.css";
+import { url } from "../Baseurl";
+import "./Dashboard.css";
 
-export default function DashboardScreen() {
+export default function DashBoard() {
     const navigate = useNavigate();
 
-    // ✅ Declare all states that you’re updating
-    const [loading, setLoading] = useState(false);
-    const [admin, setAdmin] = useState("");
-    const [leaves, setLeaves] = useState([]);
-    const [departmentUser, setDepartmentUser] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        leaves: 0,
+        assets: 0,
+        reviews: 0,
+        tasks: 0,
+    });
 
-    // ✅ Fetch Leaves
-    const fetchLeaves = useCallback(async () => {
-        setLoading(true);
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
+
+    const fetchDashboardData = async () => {
         try {
-            const username = localStorage.getItem("role");
-            setAdmin(username);
-
             const token = localStorage.getItem("U_Token");
-            const response = await fetch(`${url}/assigned-leaves`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+
+            const res = await fetch(`${url}/dashboard-stats`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
 
-            const data = await response.json();
-            console.log("Leaves:", data);
-            setLeaves(data);
-        } catch (err) {
-            console.error("Failed to fetch leaves:", err);
-            setLeaves([]);
+            const data = await res.json();
+
+            setStats({
+                leaves: data.leaves || 0,
+                assets: data.assets || 0,
+                reviews: data.reviews || 0,
+                tasks: data.tasks || 0,
+            });
+        } catch (error) {
+            console.error("Dashboard error:", error);
         } finally {
             setLoading(false);
         }
-    }, []);
-
-    // ✅ Fetch Department Users
-    const userDepartment = async () => {
-        try {
-            const username = localStorage.getItem("role");
-            const managerId = localStorage.getItem("managerId");
-
-            const res = await fetch(
-                `${url}/employee?role=${username}&managerId=${managerId}`
-            );
-            const result = await res.json();
-            console.log("Department users:", result);
-            setDepartmentUser(result);
-        } catch (error) {
-            console.error("Error fetching department users:", error);
-            setDepartmentUser([]);
-        }
     };
 
-    useEffect(() => {
-        fetchLeaves();
-        userDepartment();
-    }, [fetchLeaves]);
+    if (loading) {
+        return <div className="dashboard-loading">Loading dashboard...</div>;
+    }
 
-    // ✅ Return UI
     return (
-        <div className="user-card-container">
-            <div className="user-card" onClick={() => navigate("/Leave")}>
-                <p className="user-name">Leave</p>
-                <p className="user-info">📧 item.email</p>
-                <p className="user-info">📞 item.role</p>
-                <p className="user-info">💼 item.department</p>
+        <div className="dashboard-container">
+
+            {/* ===== STATS ===== */}
+            <div className="stats-grid">
+                <StatCard title="Leaves" count={stats.leaves} />
+                <StatCard title="Assets" count={stats.assets} />
+                <StatCard title="Reviews" count={stats.reviews} />
+                <StatCard title="Tasks" count={stats.tasks} />
             </div>
 
-            <div className="user-card" onClick={() => navigate("/AssinnAssest")}>
-                <p className="user-name">Asset</p>
-                <p className="user-info">📧 item.email</p>
-                <p className="user-info">📞 item.role</p>
-                <p className="user-info">💼 item.department</p>
-            </div>
+            {/* ===== QUICK ACTIONS ===== */}
+            <h3 className="section-title">Quick Actions</h3>
 
-            <div className="user-card" onClick={() => navigate("/ReviewForm")}>
-                <p className="user-name">Review</p>
-                <p className="user-info">📧 item.email</p>
-                <p className="user-info">📞 item.role</p>
-                <p className="user-info">💼 item.department</p>
+            <div className="action-grid">
+                <ActionCard title="Leave Management" onClick={() => navigate("/leave")} />
+                <ActionCard title="Asset Management" onClick={() => navigate("/assets/assign")} />
+                <ActionCard title="Performance Review" onClick={() => navigate("/review")} />
+                <ActionCard title="Tasks" onClick={() => navigate("/tasks")} />
             </div>
+        </div>
+    );
+}
 
-            {loading && <p>Loading data...</p>}
+/* ===== Reusable Components ===== */
+
+function StatCard({ title, count }) {
+    return (
+        <div className="stat-card">
+            <h4>{title}</h4>
+            <p>{count}</p>
+        </div>
+    );
+}
+
+function ActionCard({ title, onClick }) {
+    return (
+        <div className="action-card" onClick={onClick}>
+            <h4>{title}</h4>
+            <span>View</span>
         </div>
     );
 }

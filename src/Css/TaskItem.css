@@ -1,0 +1,170 @@
+/* ===============================
+   GLOBAL CONTAINER
+================================ */
+.task-form-container {
+    min-height: 100vh;
+    background: #f4f6f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* ===============================
+   CARD
+================================ */
+.task-card {
+    width: 100%;
+    max-width: 520px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px 26px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.task-card h1 {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #263238;
+}
+
+/* ===============================
+   FORM ELEMENTS
+================================ */
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #37474f;
+}
+
+.input,
+.textarea,
+select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #cfd8dc;
+    margin-bottom: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input:focus,
+.textarea:focus,
+select:focus {
+    border-color: #1976d2;
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* ===============================
+   BUTTONS
+================================ */
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background: #1976d2;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s;
+}
+
+.btn-submit:hover {
+    background: #1565c0;
+}
+
+.btn-submit:disabled {
+    background: #90caf9;
+    cursor: not-allowed;
+}
+
+.btn-back {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: transparent;
+    color: #1976d2;
+    border: 1px solid #1976d2;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ===============================
+   TASK LIST ITEM (FUTURE USE)
+================================ */
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+}
+
+.task-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #263238;
+}
+
+.task-meta {
+    font-size: 13px;
+    color: #607d8b;
+    margin-top: 4px;
+}
+
+/* ===============================
+   STATUS BADGES
+================================ */
+.status-pill {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.status-pill.pending {
+    background: #ff9800;
+}
+
+.status-pill.in-progress {
+    background: #1976d2;
+}
+
+.status-pill.completed {
+    background: #388e3c;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 600px) {
+    .task-card {
+        padding: 20px;
+    }
+
+    .task-card h1 {
+        font-size: 20px;
+    }
+
+    .btn-submit,
+    .btn-back {
+        font-size: 14px;
+    }
+}

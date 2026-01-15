@@ -7,7 +7,8 @@ function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false); // 👈 loading state
+    const [loading, setLoading] = useState(false);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,7 +22,7 @@ function Login() {
             return;
         }
 
-        setLoading(true); // start loader
+        setLoading(true);
         setError("");
 
         try {
@@ -32,6 +33,7 @@ function Login() {
             });
 
             const result = await res.json();
+
             if (res.ok) {
                 const { user, token } = result;
 
@@ -42,57 +44,65 @@ function Login() {
                 localStorage.setItem("role", user.role);
                 localStorage.setItem("userCode", user.employeescode);
                 localStorage.setItem("department", user.department);
-                localStorage.setItem("managerId", user.role === "manager" ? user.id : user.managerId || "");
+                localStorage.setItem(
+                    "managerId",
+                    user.role === "manager" ? user.id : user.managerId || ""
+                );
 
                 navigate("/");
             } else {
-                setError(result.message || "Invalid login credentials.");
+                setError(result.message || "Invalid login credentials");
             }
         } catch (err) {
-            console.error("Login error:", err);
             setError("Server error. Please try again.");
         } finally {
-            setLoading(false); // stop loader
+            setLoading(false);
         }
     };
 
     return (
-        <div className="login-page">
-            {/* Modal Loader */}
+        <div className="login-wrapper">
+            {/* 🔵 HEADER */}
+            <div className="login-header">
+                <img src="/Applogcurcle.jpg" alt="AEW Logo" />
+                <h2>AEW Services</h2>
+            </div>
+
+            {/* 🔄 Loader */}
             {loading && (
                 <div className="modal-overlay">
                     <div className="loader"></div>
                 </div>
             )}
 
-            <div className="form-container">
-                <h1 className="login-title">Login</h1>
+            {/* 🧾 LOGIN CARD */}
+            <div className="login-card">
+                <h1>Login</h1>
 
                 <input
                     type="email"
-                    className="inputBox"
-                    placeholder="Enter Your Email"
+                    placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                 />
 
                 <input
                     type="password"
-                    className="inputBox"
-                    placeholder="Enter Your Password"
+                    placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
 
-                {error && <div className="error-msg">{error}</div>}
+                {error && <p className="error-msg">{error}</p>}
 
-                <button
-                    onClick={handleLogin}
-                    className="AppButton"
-                    disabled={loading}
-                >
+                <button onClick={handleLogin} disabled={loading}>
                     {loading ? "Logging in..." : "Login"}
                 </button>
+
+                <p className="register-text">
+                    Don’t have an account?
+                    <span onClick={() => navigate("/signup")}> Register</span>
+                </p>
             </div>
         </div>
     );

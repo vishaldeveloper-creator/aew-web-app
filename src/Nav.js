@@ -1,30 +1,44 @@
-import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./Css/Nav.css";
 
-function Nav() {
+export default function Nav() {
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const username = localStorage.getItem("username");
-    const role = localStorage.getItem("role");
+    const [auth, setAuth] = useState({
+        username: null,
+        role: null,
+    });
 
-    const logoutmethod = () => {
+    /* 🔁 Sync auth on load & login/logout */
+    useEffect(() => {
+        setAuth({
+            username: localStorage.getItem("username"),
+            role: localStorage.getItem("role"),
+        });
+    }, []);
+
+    const logout = () => {
         localStorage.clear();
-        navigate('/SignUp');
+        setAuth({ username: null, role: null });
+        navigate("/login");
     };
 
-    const getActive = ({ isActive }) =>
+    const linkClass = ({ isActive }) =>
         isActive ? "nav-link active" : "nav-link";
+
+    /* 🔒 Hide Nav if not logged in */
+    if (!auth.username) return null;
 
     return (
         <header className="nav-header">
-            {/* LEFT: Logo + Brand */}
+            {/* LOGO */}
             <div className="nav-left">
                 <img
                     src="/Applogcurcle.jpg"
                     alt="Logo"
-                    className="nav-logo rotate-logo"   // ⭐ ROTATING LOGO
+                    className="nav-logo rotate-logo"
                 />
                 <span className="brand">Smart HR</span>
             </div>
@@ -34,53 +48,38 @@ function Nav() {
                 className={`hamburger ${menuOpen ? "open" : ""}`}
                 onClick={() => setMenuOpen(!menuOpen)}
             >
-                <span></span><span></span><span></span>
+                <span /><span /><span />
             </div>
 
             {/* MENU */}
             <nav className={`nav-menu ${menuOpen ? "show" : ""}`}>
                 <ul>
-                    {username ? (
-                        <>
-                            <li><NavLink to="/" className={getActive}>Dashboard</NavLink></li>
+                    <li><NavLink to="/" className={linkClass}>Dashboard</NavLink></li>
 
-                            <li><NavLink to="/Leave" className={getActive}>Leave</NavLink></li>
+                    <li><NavLink to="/leave" className={linkClass}>Leave</NavLink></li>
+                    <li><NavLink to="/leave/add" className={linkClass}>Add Leave</NavLink></li>
 
-                            {role !== "manager" && (
-                                <li><NavLink to="/Add" className={getActive}>Add Leave</NavLink></li>
-                            )}
+                    <li><NavLink to="/profile" className={linkClass}>Profile</NavLink></li>
 
-                            <li><NavLink to="/Profile" className={getActive}>Profile</NavLink></li>
+                    <li><NavLink to="/assets/assign" className={linkClass}>Assets</NavLink></li>
 
-                            <li><NavLink to="/AssinnAssest" className={getActive}>Assigned Assets</NavLink></li>
-
-                            {role !== "employee" && (
-                                <li><NavLink to="/AddAssest" className={getActive}>Add Asset</NavLink></li>
-                            )}
-
-                            <li><NavLink to="/Review" className={getActive}>Review</NavLink></li>
-
-                            <li><NavLink to="/ReviewForm" className={getActive}>Review Form</NavLink></li>
-
-                            <li>
-                                <button
-                                    onClick={logoutmethod}
-                                    className="logout-btn"
-                                >
-                                    Logout ({username})
-                                </button>
-                            </li>
-                        </>
-                    ) : (
-                        <>
-                            <li><NavLink to="/SignUp" className={getActive}>SignUp</NavLink></li>
-                            <li><NavLink to="/Login" className={getActive}>Login</NavLink></li>
-                        </>
+                    {auth.role !== "employee" && (
+                        <li><NavLink to="/assets/add" className={linkClass}>Add Asset</NavLink></li>
                     )}
+
+                    <li><NavLink to="/review" className={linkClass}>Review</NavLink></li>
+                    <li><NavLink to="/review/form" className={linkClass}>Review Form</NavLink></li>
+
+                    <li><NavLink to="/tasks" className={linkClass}>Tasks</NavLink></li>
+                    <li><NavLink to="/tasks/create" className={linkClass}>Create Task</NavLink></li>
+
+                    <li>
+                        <button onClick={logout} className="logout-btn">
+                            Logout ({auth.username})
+                        </button>
+                    </li>
                 </ul>
             </nav>
         </header>
     );
 }
-
-export default Nav;

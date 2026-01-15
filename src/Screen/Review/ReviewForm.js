@@ -54,6 +54,7 @@ export default function ReviewForm() {
     async function fetchEmployees() {
         try {
             const token = localStorage.getItem('U_Token');
+
             const res = await axios.get(`${url}/api/manager-employees`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -184,40 +185,31 @@ export default function ReviewForm() {
     // Submit Ratings
     // -------------------------------------------------------
     async function handleSubmit() {
-        if (!formData.employeeId) return alert("Select employee");
-        if (!formData.reviewPeriodFrom) return alert("Select review period");
-
         const reviewPeriod = generateReviewPeriod();
         const token = localStorage.getItem("U_Token");
 
-        try {
-            for (const r of formData.ratings) {
-                const ratingValue =
-                    role === "employee"
-                        ? r.employeeRating
-                        : role === "manager"
-                            ? r.managerRating
-                            : r.managementRating;
+        for (const r of formData.ratings) {
+            const ratingValue =
+                role === "employee" ? r.employeeRating :
+                    role === "manager" ? r.managerRating :
+                        r.managementRating;
 
-                await axios.put(
-                    `${url}/assign-ratings`,
-                    {
-                        employeeId: formData.employeeId,
-                        reviewPeriod,
-                        kpaId: r.kpaId,
-                        kpaTitle: r.kpaTitle,
-                        kpaResponsibility: r.kpaResponsibility,
-                        ratingValue,
-                        comment: r.comment
-                    },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-            }
-
-            alert("Ratings saved successfully!");
-        } catch (err) {
-            alert("Error submitting ratings");
+            await axios.put(
+                `${url}/assign-ratings`,
+                {
+                    employeeId: formData.employeeId,
+                    reviewPeriod,
+                    kpaId: r.kpaId,
+                    title: r.kpaTitle,
+                    responsibility: r.kpaResponsibility,
+                    ratingValue,
+                    comment: r.comment
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
         }
+
+        alert("Saved successfully");
     }
 
     // -------------------------------------------------------
