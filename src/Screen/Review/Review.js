@@ -130,9 +130,9 @@ export default function ReviewEditable() {
                                         <th>#</th>
                                         <th>KPA</th>
                                         <th>Responsibility</th>
-                                        <th>Emp</th>
-                                        <th>Mgr</th>
-                                        <th>Mgt</th>
+                                        <th>Employee</th>
+                                        <th>Manager</th>
+                                        <th>Management</th>
                                         <th>Remarks</th>
                                     </tr>
                                 </thead>
